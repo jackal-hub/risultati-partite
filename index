@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risultati Partite</title>
+    <meta name="description" content="Visualizza i risultati delle partite in tempo reale.">
+    <meta name="keywords" content="risultati partite, calcio, sport, API risultati">
+    <meta name="author" content="Il tuo nome">
+    <meta name="robots" content="index, follow">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        .container {
+            padding: 1rem;
+            max-width: 800px;
+            margin: auto;
+        }
+        .match {
+            border: 1px solid #ddd;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 5px;
+            background: #fff;
+        }
+        .match h3 {
+            margin: 0 0 0.5rem 0;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Risultati delle Partite</h1>
+    </header>
+    <div class="container">
+        <div id="results"></div>
+        <p id="error" class="error"></p>
+    </div>
+    <script>
+        // Funzione per ottenere i risultati delle partite
+        async function fetchMatchResults() {
+            const resultsContainer = document.getElementById('results');
+            const errorContainer = document.getElementById('error');
+
+            try {
+                // URL API: inserire l'endpoint corretto dell'API
+                const response = await fetch('https://api.football-data.org/v4/matches', {
+                    headers: {
+                        'Authorization': 'bc4fc62e0f02427e8c3d3df34267ca4a'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Errore API: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Pulizia contenitori
+                resultsContainer.innerHTML = '';
+                errorContainer.textContent = '';
+
+                // Mostra i risultati
+                if (data.matches && data.matches.length > 0) {
+                    data.matches.forEach(match => {
+                        const matchElement = document.createElement('div');
+                        matchElement.classList.add('match');
+
+                        matchElement.innerHTML = `
+                            <h3>${match.homeTeam.name} vs ${match.awayTeam.name}</h3>
+                            <p>Data: ${new Date(match.utcDate).toLocaleString()}</p>
+                            <p>Risultato: ${match.score.fullTime.homeTeam} - ${match.score.fullTime.awayTeam}</p>
+                        `;
+
+                        resultsContainer.appendChild(matchElement);
+                    });
+                } else {
+                    resultsContainer.innerHTML = '<p>Nessun risultato disponibile.</p>';
+                }
+            } catch (error) {
+                console.error('Errore nel caricamento dei dati:', error);
+                errorContainer.textContent = 'Impossibile ottenere i risultati. Riprova più tardi.';
+            }
+        }
+
+        // Richiama la funzione al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', fetchMatchResults);
+    </script>
+</body>
+</html>
